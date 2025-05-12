@@ -1,4 +1,5 @@
 import os
+import csv
 from datetime import datetime
 from langchain_openai import ChatOpenAI
 from src.nodes.code_execution import ExecutedResult
@@ -8,6 +9,7 @@ from dotenv import load_dotenv
 def main():
     load_dotenv()
 
+    # input_data = r"C:\Users\1109685\Documents\IR\input\sample_mess.csv"
     input_data = r"C:\Users\1109685\Documents\IR\input\sample.csv"
 
     # 現在時刻を取得してフォルダ・ファイル名を生成
@@ -26,7 +28,7 @@ def main():
 
     # 出力を文字列に変換
     if isinstance(output, ExecutedResult):
-        output_str = f"実行結果: {output.result}\nエラー内容: {output.error}"
+        output_str = f"実行結果: {output.result}"
     else:
         output_str = str(output)
 
@@ -34,8 +36,22 @@ def main():
     os.makedirs(output_dir, exist_ok=True)
 
     # 結果を保存
-    with open(output_path, "w", encoding="utf-8") as f:
-        f.write(output_str)
+    with open(output_path, "w", newline='', encoding="utf-8") as f:
+        writer = csv.writer(f)
+
+        # 出力を行ごとに分割し、必要な改行を削除
+        lines = output_str.splitlines()
+        row = []
+        for line in lines:
+            # カンマ区切りの行であればそのままCSVに書き込み
+            row.extend(line.split(","))
+            # 一行をまとめて書き込み
+            if len(row) >= 15:  # CSVの列数が15列に達したら書き込み
+                writer.writerow(row)
+                row = []  # 次の行のためにリセット
+        # 最後の残りの行があれば書き込み
+        if row:
+            writer.writerow(row)
 
     print(f"出力結果を {output_path} に保存しました。")
 
