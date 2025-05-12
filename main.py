@@ -1,5 +1,4 @@
 import os
-import csv
 from datetime import datetime
 from langchain_openai import ChatOpenAI
 from src.nodes.code_execution import ExecutedResult
@@ -37,21 +36,7 @@ def main():
 
     # 結果を保存
     with open(output_path, "w", newline='', encoding="utf-8") as f:
-        writer = csv.writer(f)
-
-        # 出力を行ごとに分割し、必要な改行を削除
-        lines = output_str.splitlines()
-        row = []
-        for line in lines:
-            # カンマ区切りの行であればそのままCSVに書き込み
-            row.extend(line.split(","))
-            # 一行をまとめて書き込み
-            if len(row) >= 15:  # CSVの列数が15列に達したら書き込み
-                writer.writerow(row)
-                row = []  # 次の行のためにリセット
-        # 最後の残りの行があれば書き込み
-        if row:
-            writer.writerow(row)
+        f.write(output_str)
 
     print(f"出力結果を {output_path} に保存しました。")
 

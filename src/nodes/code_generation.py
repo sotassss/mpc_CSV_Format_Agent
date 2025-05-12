@@ -15,12 +15,12 @@ class CodeGenerationNode:
             ("system",
             "あなたは優秀なPythonエンジニアです。あなたの業務は、正確なPythonコードを生成することです。"),
             ("human",
-            "以下のデータの最初の3行を取得できるようなPythonコードを生成してください。\n\n"
+            "以下のデータの最初の2行を取得できるようなPythonコードを生成してください。\n\n"
             "データ:\n{data}\n\n"
             "データに関する説明を添付するので参考にしてください:\n{description}\n\n"
             "内容を書き換えてはいけません。\n\n"
             "出力はcsvファイルとなるようにしてください。不要な改行をしないようにしてください。\n\n"
-            "重要：REPLで実行されるため、最後に必ず print() 文を使って結果を表示してください。\n\n"
+            "重要：REPLで実行されるため、最後に必ず print(result.rstrip('\n'))文を使って結果を表示してください。\n\n"
             "例：\n"
             "```python\n"
             "result = df.head(3).to_csv(index=False)\n"
