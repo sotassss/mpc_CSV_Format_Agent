@@ -1,0 +1,1 @@
+SyntaxError("(unicode error) 'unicodeescape' codec can't decode bytes in position 2-3: truncated \\UXXXXXXXX escape", ('<string>', 3, 66, "df = pd.read_csv('C:\\Users\\1109685\\Documents\\IR\\input\\sample.csv')\n", 3, 67))

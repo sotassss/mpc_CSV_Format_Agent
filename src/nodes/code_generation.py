@@ -7,17 +7,17 @@ from src.model_types import DataAnalysisResult, GeneratedCode
 
 class CodeGenerationNode:
     def __init__(self, llm):
-        self.llm = llm
+        self.llm = llm.with_structured_output(GeneratedCode)
         self.python_repl = PythonREPLTool()
         
-    def run(self, description: DataAnalysisResult, data: str) -> GeneratedCode:
+    def run(self, data_analysis_result: DataAnalysisResult, data: str) -> GeneratedCode:
         prompt = ChatPromptTemplate.from_messages([
             ("system",
             "あなたは優秀なPythonエンジニアです。あなたの業務は、正確なPythonコードを生成することです。"),
             ("human",
             "以下のデータの最初の2行を取得できるようなPythonコードを生成してください。\n\n"
             "データ:\n{data}\n\n"
-            "データに関する説明を添付するので参考にしてください:\n{description}\n\n"
+            "データに関する説明を添付するので参考にしてください:\n{data_analysis_result}\n\n"
             "内容を書き換えてはいけません。\n\n"
             "出力はcsvファイルとなるようにしてください。不要な改行をしないようにしてください。\n\n"
             "重要：REPLで実行されるため、最後に必ず print(result.rstrip('\n'))文を使って結果を表示してください。\n\n"
@@ -28,13 +28,12 @@ class CodeGenerationNode:
             "```")
         ])
         
-        # まずLLMを使ってコードを生成するチェーンを作成
-        chain = prompt | self.llm.with_structured_output(GeneratedCode)
+        chain = prompt | self.llm
         
         # コードの生成
         generated_code = chain.invoke({
             "data": data,
-            "description": description.data_content
+            "data_analysis_result": data_analysis_result.data_content
         })
         
         # 生成されたコードをPythonREPLで実行
@@ -47,6 +46,16 @@ class CodeGenerationNode:
                 generated_code.output = f"コード実行エラー: {str(e)}"
                 
         return  generated_code
+
+
+
+
+
+
+
+
+
+
 
 
 # 確認用
