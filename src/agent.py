@@ -3,9 +3,9 @@ from langgraph.graph import END,StateGraph
 from src.state import State
 from src.utils.proxy import handle_proxy_request
 
-from src.nodes.data_analysis import DataAnalysisNode
-from src.nodes.code_generation import CodeGenerationNode
-from src.nodes.result_evaluation import ResultEvaluationNode
+from src.nodes.data_analysis_node import DataAnalysisNode
+from src.nodes.code_generation_node import CodeGenerationNode
+from src.nodes.result_evaluation_node import ResultEvaluationNode
 from src.model_types import DataAnalysisResult,GeneratedCode,EvaluationResult
 
 class ExcelFormat:
