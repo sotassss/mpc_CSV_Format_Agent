@@ -10,12 +10,12 @@ json_data = dataframe_data.to_json(orient="records", force_ascii=False)
 # with open("output/data_output.json", "w", encoding="utf-8") as f:
 #     f.write(json_data)
 
-with open("output/data_output_filtered.md", "r", encoding="utf-8") as f:
+with open("output/data_output_color_short_modified.md", "r", encoding="utf-8") as f:
     markdown_data = f.read()
 
-os.makedirs("output", exist_ok=True)
-with open("output/data_output.md", "w", encoding="utf-8") as f:
-    f.write(markdown_data)
+with open("output/data_output_color_short.html", "r", encoding="utf-8") as f:
+    html_data = f.read()
+
 
 # 生成AI系のインポート
 from langchain_core.prompts import ChatPromptTemplate
@@ -30,13 +30,15 @@ prompt = ChatPromptTemplate.from_messages([
     ("human", """
                 以下のデータを分析してください。
                 データの内容は{data}です。
-                この表には複数の表構造が含まれています。
-                「◆重要指数」の表構造を解析し、行の項目名を出力してください。
-                大項目・中項目を含むような場合は、最も小さい分類まで表示してください。
+                「◆重要指数」の表構造を解析し、行の項目名を出力してください
+                階層構造の読解において、色の情報を参考にしてください。
+                階層構造を正しく理解してください。
+                余計な情報は含まず、重複に注意してください。
+                大項目・中項目を含むような場合は、最も小さい項目まで表示してください。
                 大項目を例示すると、「獲得数計」や「wel-fit」などのような分類のことです。
                 中項目を例示すると、「レギュラー」や「アドバンス」のような分類のことです。
                 回答は以下の形式ですべての項目を答えてください。
-                必ずデータに含まれた項目名のみで回答を生成してください。
+                重複しないようにしてください。
 
                 ◆重要指数：
                 大項目1:
@@ -59,7 +61,7 @@ prompt = ChatPromptTemplate.from_messages([
 
 chain = prompt | llm
 
-result = chain.invoke({"data": markdown_data})
+result = chain.invoke({"data": html_data})
 # result = chain.invoke({"data": json_data})
 
 print(result.content)
