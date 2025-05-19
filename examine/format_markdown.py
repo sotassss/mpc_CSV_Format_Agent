@@ -1,28 +1,44 @@
+import re
 import pandas as pd
 import io
+import numpy as np
+
+def is_separator_line(line: str) -> bool:
+    pattern = r'^[-:\s|]+$'
+    return bool(re.match(pattern, line.strip()))
 
 input_markdown = "output/data_output_color_short.md"
 output_markdown = "output/data_output_color_short_modified.md"
 
-# Markdownファイルを読み込む
 with open(input_markdown, "r", encoding="utf-8") as f:
-    markdown_text = f.read()
+    lines = f.readlines()
 
-# 各行の先頭・末尾のパイプを削除し、空行を除去
-lines = [line.strip().strip('|') for line in markdown_text.strip().split('\n') if line.strip()]
-cleaned_markdown = '\n'.join(lines)
+filtered_lines = [line for line in lines if line.strip() and not is_separator_line(line)]
+filtered_lines = [line.strip().strip('|') for line in filtered_lines]
+cleaned_markdown = '\n'.join(filtered_lines)
 
-# DataFrameに変換
-df = pd.read_csv(io.StringIO(cleaned_markdown), sep='|')
+df = pd.read_csv(io.StringIO(cleaned_markdown), sep='|', skipinitialspace=True)
 
-# 全てNaNの列を削除
-df = df.dropna(how='all', axis=1)
+# 空白・空文字セルをNaNに置換
+df = df.replace(r'^\s*$', np.nan, regex=True)
 
-# DataFrameをMarkdown形式に変換
+# 全てのセルがNaNまたは'nan'含む文字列なら削除する関数
+def is_all_nan_or_contains_nan_string(col):
+    for v in col:
+        if pd.isna(v):
+            continue
+        s = str(v).lower()
+        if 'nan' not in s:
+            return False
+    return True
+
+cols_to_drop = [col for col in df.columns if is_all_nan_or_contains_nan_string(df[col])]
+df = df.drop(columns=cols_to_drop)
+
+print(f"最終DataFrameのshape: {df.shape}")
+
 output_md = df.to_markdown(index=False)
-
-# Markdownファイルとして保存
 with open(output_markdown, "w", encoding="utf-8") as f:
     f.write(output_md)
 
-print(f"Markdownテーブルを{output_markdown}に保存しました。")
+print(f"最終Markdownテーブルを{output_markdown}に保存しました。")
