@@ -4,7 +4,7 @@ excel = pd.ExcelFile("C:/Users/1109685/Documents/IR/Sample_freejob_short.xlsx")
 dataframe_data = pd.read_excel(excel, sheet_name=0)
 
 json_data = dataframe_data.to_json(orient="records", force_ascii=False)
-# markdown_data = dataframe_data.to_markdown()
+markdown_data = dataframe_data.to_markdown()
 
 # os.makedirs("output", exist_ok=True)
 # with open("output/data_output.json", "w", encoding="utf-8") as f:
@@ -28,13 +28,31 @@ llm = ChatOpenAI(model="gpt-4.1-nano")
 prompt = ChatPromptTemplate.from_messages([
     ("system", "あなたは表構造解析のスペシャリストです。"),
     ("human", """
-    まず、以下の表構造を縦方向に解析してください。
-    表構造 : {data}
-    そして、列の項目名をすべて列挙してください。
-     横方向は考えなくてよいです。
-     色の情報、枠線の情報を活用してください。
-     アルバイトという項目名はありますか。
+    以下のデータを分析してください。
+    データの内容は{data}です。
+    「◆重要指数」の表構造を解析し、行の項目名を上から順に出力してください。
+    必ず、表構造に書いてある内容を出力に用いてください。
+    階層構造の読解において、色の情報・枠線の情報を参考にしてください。
+    色は重要な分類階層を示しています。
+    枠線が構造の大枠を示しています。
+    階層構造を正しく理解してください。
+    余計な情報は含まず、重複に注意してください。
+    大項目・中項目を含むような場合は、最も小さい項目まで表示してください。
+    大項目を例示すると、「獲得数計」や「wel-fit」です。
+    中項目を例示すると、「レギュラー」や「アドバンス」です。
+    回答は以下の形式ですべての項目を答えてください。大項目は必ず複数あります。
+    重複しないようにしてください。
 
+    ◆重要指数：
+    大項目1:
+        - 中項目1
+        - 中項目2
+        - 中項目3
+    大項目2:
+        - 中項目1
+        .....
+    
+    回答形式を遵守し、回答のみを表示してください。
             """),
     # ("human","""
     #             以下のデータを分析してください。    
@@ -47,6 +65,6 @@ prompt = ChatPromptTemplate.from_messages([
 chain = prompt | llm
 
 result = chain.invoke({"data": html_data})
-# result = chain.invoke({"data": json_data})
+# result = chain.invoke({"data": markdown_data})
 
 print(result.content)
