@@ -2,8 +2,8 @@ import pandas as pd
 from openpyxl import load_workbook
 from openpyxl.styles.borders import Border
 
-input_path = "C:/Users/1109685/Documents/IR/Sample_freejob_short.xlsx"
-output_path = "output/data_output_color_short.html"
+input_path = "C:/Users/1109685/Documents/IR/Sample_freejob_short_format.xlsx"
+output_path = "output/data_output_color_short_format.html"
 
 df = pd.read_excel(input_path)
 wb = load_workbook(input_path)

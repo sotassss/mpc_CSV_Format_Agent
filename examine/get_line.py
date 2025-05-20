@@ -2,7 +2,9 @@ import openpyxl
 from openpyxl.utils import get_column_letter
 
 # エクセルファイルのパス
-file_path = "C:/Users/1109685/Documents/IR/Sample_freejob_short.xlsx"
+file_path = "C:/Users/1109685/Documents/IR/Sample_freejob_short_format.xlsx"
+# file_path = "C:/Users/1109685/Documents/IR/Sample_freejob_short.xlsx"
+# file_path = "C:/Users/1109685/Documents/IR/Sample_freejob.xlsx"
 
 # ワークブックを開く
 wb = openpyxl.load_workbook(file_path)

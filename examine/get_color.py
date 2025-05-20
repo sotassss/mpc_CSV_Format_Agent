@@ -1,7 +1,9 @@
 # エクセルの背景色を取得する
 from openpyxl import load_workbook
 
-wb = load_workbook("c:/Users/1109685/Documents/IR/Sample_freejob_short.xlsx")
+# wb = load_workbook("c:/Users/1109685/Documents/IR/Sample_freejob_short.xlsx")
+wb = load_workbook("c:/Users/1109685/Documents/IR/Sample_freejob_short_format.xlsx")
+
 sheet = wb.active
 
 for row in sheet.iter_rows(min_row=1, max_row=sheet.max_row, min_col=1, max_col=sheet.max_column):
