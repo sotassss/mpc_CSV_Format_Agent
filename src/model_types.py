@@ -1,14 +1,15 @@
 from pydantic import BaseModel,Field
 from typing import Optional
 
-class DataAnalysisResult(BaseModel):
-    data_summary:str = Field(..., description="データの要約")
-    data_content:str = Field(..., description="データの内容")
+class SearchProblem(BaseModel):
+    problem_list:str = Field(..., description="Tidyデータに変換する際の問題点")
 
-class GeneratedCode(BaseModel):
+class GeneratePython(BaseModel):
     code: str = Field(description="生成されたPythonコード")
-    output: Optional[str] = Field(None, description="コード実行の出力結果")
 
-class EvaluationResult(BaseModel):
+class ExecutePython(BaseModel):
+    output: str = Field(description="実行結果")   
+
+class EvaluationData(BaseModel):
     result:bool=Field(..., description="判定結果")
     feedback:str=Field(..., description="フィードバック")

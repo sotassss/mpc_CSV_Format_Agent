@@ -3,29 +3,34 @@ from langchain_experimental.tools import PythonREPLTool
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
 
-from src.model_types import DataAnalysisResult, GeneratedCode
+from src.model_types import SearchProblem,GeneratePython
+
 
 class CodeGenerationNode:
     def __init__(self, llm):
-        self.llm = llm.with_structured_output(GeneratedCode)
-        self.python_repl = PythonREPLTool()
+        self.llm = llm.with_structured_output(GeneratePython)
         
-    def run(self, data_analysis_result: DataAnalysisResult, data: str) -> GeneratedCode:
+    def run(self, problem:SearchProblem, data: str) -> GeneratePython:
         prompt = ChatPromptTemplate.from_messages([
             ("system",
             "あなたは優秀なPythonエンジニアです。あなたの業務は、正確なPythonコードを生成することです。"),
             ("human",
-            "以下のデータの最初の2行を取得できるようなPythonコードを生成してください。\n\n"
-            "データ:\n{data}\n\n"
-            "データに関する説明を添付するので参考にしてください:\n{data_analysis_result}\n\n"
-            "内容を書き換えてはいけません。\n\n"
-            "出力はcsvファイルとなるようにしてください。不要な改行をしないようにしてください。\n\n"
-            "重要：REPLで実行されるため、最後に必ず print(result.rstrip('\n'))文を使って結果を表示してください。\n\n"
-            "例：\n"
-            "```python\n"
-            "result = df.head(3).to_csv(index=False)\n"
-            "print(result)  # これで結果が表示されます\n"
-            "```")
+             """
+            以下のデータに対して、以下の問題を解決するようなPythonコードを生成してください。
+            データ:{data}
+            問題:{problem}
+
+            有効なPythonコードを生成してください。
+            内容を書き換えてはいけません。
+            出力はcsvファイルとなるようにしてください。不要な改行をしないようにしてください。
+            重要：REPLで実行されるため、最後に必ず print(result.rstrip('\n'))文を使って結果を表示してください。
+            例：
+            ```python
+            result = df.head(3).to_csv(index=False)
+            print(result)  # これで結果が表示されます
+            ```
+            """
+            ),
         ])
         
         chain = prompt | self.llm
@@ -33,17 +38,8 @@ class CodeGenerationNode:
         # コードの生成
         generated_code = chain.invoke({
             "data": data,
-            "data_analysis_result": data_analysis_result.data_content
+            "problem": problem
         })
-        
-        # 生成されたコードをPythonREPLで実行
-        if generated_code and generated_code.code:
-            try:
-                execution_result = self.python_repl.invoke(generated_code.code)
-                generated_code.output = execution_result
-                print(execution_result)
-            except Exception as e:
-                generated_code.output = f"コード実行エラー: {str(e)}"
                 
         return  generated_code
 
