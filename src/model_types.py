@@ -2,7 +2,7 @@ from pydantic import BaseModel,Field
 from typing import Optional
 
 class SearchProblem(BaseModel):
-    problem_list:str = Field(..., description="Tidyデータに変換する際の問題点")
+    problem:str = Field(..., description="Tidyデータに変換する際の問題点")
 
 class GeneratePython(BaseModel):
     code: str = Field(description="生成されたPythonコード")

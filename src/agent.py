@@ -1,12 +1,13 @@
+import pandas as pd
 from langgraph.graph import END,StateGraph
 
 from src.state import State
 from src.utils.proxy import handle_proxy_request
 
-from nodes.search_problem_node import SearchProblemNode
-from nodes.code_generation_node import CodeGenerationNode
-from nodes.code_execution_node import CodeExecutionNode
-from nodes.result_evaluation_node import ResultEvaluationNode
+from src.nodes.search_problem_node import SearchProblemNode
+from src.nodes.code_generation_node import CodeGenerationNode
+from src.nodes.code_execution_node import CodeExecutionNode
+from src.nodes.result_evaluation_node import ResultEvaluationNode
 from src.model_types import SearchProblem,GeneratePython,ExecutePython,EvaluationData
 
 
@@ -16,26 +17,21 @@ class ExcelFormat:
         self.search_problem_node = SearchProblemNode(llm)
         self.code_generation_node = CodeGenerationNode(llm)
         self.code_execution_node = CodeExecutionNode()
-        self.evaluation_node = ResultEvaluationNode(llm)
+        self.result_evaluation_node = ResultEvaluationNode(llm)
 
-        #グラフ作成
         self.graph=self._create_graph()
 
     def _create_graph(self)->StateGraph:
-        # 初期化
         workflow=StateGraph(State)
 
-        #ノードの追加
         workflow.add_node("search_problem",self._search_problem)
         workflow.add_node("code_generation",self._code_generation)
         workflow.add_node("code_execution",self._code_execution)
         workflow.add_node("result_evaluation",self._result_evaluation)
         
-        # 開始点の追加
         workflow.set_entry_point("search_problem")
 
-        # ノード間の接続
-        workflow.add_edge("data_analysis","code_generation")
+        workflow.add_edge("search_problem","code_generation")
         workflow.add_edge("code_generation","code_execution")
         workflow.add_edge("code_execution","result_evaluation")
 
@@ -48,55 +44,77 @@ class ExcelFormat:
         return workflow.compile()
     
 
-    def run(self,data_path:str)->GeneratePython:
-        # ステートの初期化
+    def run(self,data_path:str)->str:
+        # 初期化
         initial_state = State(
-            data_path=data_path,
-            iteration=1,
-            data_problem=SearchProblem(problem="問題"),  # 初期のデータ分析結果
-            generated_code=GeneratePython(code="生成されたPythonコード"),  # 初期の生成コード
-            executed_data=ExecutePython(result="実行結果"),  # 初期の実行結果
-            evaluation_result=EvaluationData(result=True, feedback="問題なし")  # 初期の評価結果
-        )
+                data_path=data_path,
+                data_content="",
+                iteration=1,
+                data_problem=SearchProblem(problem="問題"),  
+                generated_code=GeneratePython(code="生成されたPythonコード"),
+                executed_data=ExecutePython(output="実行結果"),  
+                evaluation_result=EvaluationData(result=True, feedback="問題なし")
+            )
 
         # ワークフローの実行
-        result=self.graph.invoke(initial_state)
+        final_state=self.graph.invoke(initial_state)
 
-        # 結果を返す
-        return result 
+        return final_state["data_path"]
         
-
 
     # 各ノードにおける処理
     def _search_problem(self,state:State):
-        handle_proxy_request()  # プロキシ設定を自動で切り替える処理
+        handle_proxy_request()  # プロキシ処理
+        data_df = pd.read_csv(state.data_path, encoding="utf-8")
+        data_content = data_df.to_csv(index=False, encoding="utf-8")
         print("問題探索中...")
-        data_analysis_result=self.data_analysis_node.run(data=state.data)
-        return {"data_analysis_result":data_analysis_result}
+        data_problem = self.search_problem_node.run(
+            data_path=state.data_path,
+            data_content=data_content
+            )
+        return {
+            "data_content": data_content,
+            "data_problem": data_problem
+            }
     
     def _code_generation(self,state:State):
-        handle_proxy_request()  # プロキシ設定を自動で切り替える処理
+        handle_proxy_request()  # プロキシ処理
+
         if state.iteration<=1:
             print("Pythonコード生成中...")
         else:
             print(f"再度Pythonコード生成中...{state.iteration}/{self.maximum_iteration}回目")
-        code_generation=self.code_generation_node.run(
-            problem=state.data_problem,
-            data=state.data
+
+        data_df = pd.read_csv(state.data_path, encoding="utf-8")
+        data_content = data_df.to_csv(index=False, encoding="utf-8")
+        generated_code = self.code_generation_node.run(
+            data_path=state.data_path,
+            data_content=data_content,
+            problem=state.data_problem
         )
-        return {"generated_code":code_generation}
+        return {
+            "generated_code": generated_code,
+            "data_content": data_content
+            }
     
     def _code_execution(self,state:State):
-        handle_proxy_request()  # プロキシ設定を自動で切り替える処理
+        handle_proxy_request()  # プロキシ処理
         print("Pythonコード実行中...")
-        code_execution_result=self.code_execution_node.run(
-            code=state.generated_code
-        )
-        return {"executed_result":code_execution_result}
+        executed_data = self.code_execution_node.run(
+            code=state.generated_code,
+            save_path=state.data_path
+            )
+        return {
+            "executed_data": executed_data
+            }
     
     def _result_evaluation(self,state:State):
+        handle_proxy_request()  # プロキシ処理
         print("結果を評価しています...")
-        evaluation_result=self.result_evaluation_node.run(
-            execution_result=state.executed_data)
-        return {"evaluation_result":evaluation_result,
-                "iteration":state.iteration+1}
+        evaluation_result = self.result_evaluation_node.run(
+            state.executed_data
+            )
+        return {
+            "evaluation_result": evaluation_result,
+            "iteration": state.iteration+1
+            }

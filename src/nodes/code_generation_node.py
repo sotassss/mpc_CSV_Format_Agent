@@ -1,34 +1,58 @@
+import pandas as pd
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_experimental.tools import PythonREPLTool
 from langchain_openai import ChatOpenAI
-from dotenv import load_dotenv
 
 from src.model_types import SearchProblem,GeneratePython
 
 
 class CodeGenerationNode:
+    """
+    分析された問題を解決するPythonコードを生成する。
+
+    Parameters
+    ----------
+    data_path : str
+        対象データのパス
+    data_content : str
+        対象データの内容
+    problem : SearchProblem
+        対象データの問題点
+    
+    Returns
+    ----------
+    generated_code : GeneratePython
+        生成されたPythonコード
+    """
     def __init__(self, llm):
         self.llm = llm.with_structured_output(GeneratePython)
         
-    def run(self, problem:SearchProblem, data: str) -> GeneratePython:
+    def run(self, data_path: str, data_content: str, problem:SearchProblem) -> GeneratePython:
         prompt = ChatPromptTemplate.from_messages([
             ("system",
-            "あなたは優秀なPythonエンジニアです。あなたの業務は、正確なPythonコードを生成することです。"),
+                "あなたは優秀なPythonエンジニアです。あなたの業務は、正確なPythonコードを生成することです。"),
             ("human",
              """
-            以下のデータに対して、以下の問題を解決するようなPythonコードを生成してください。
-            データ:{data}
-            問題:{problem}
+                以下のデータに対して、以下の問題を解決するPythonコードを生成してください。
+                - データはCSV形式です。出力も必ずCSV形式となるPythonコードを生成してください。
+                - データファイルのパスは `{data_path}` という変数に格納されています。
+                - pandasを使ってデータを読み込み、処理し、最後に `df.to_csv({data_path}, index=False)` で**上書き保存**してください。
+                - コードはPythonのREPL環境でそのまま実行できるようにしてください。
+                - 不要な改行をしないでください。
 
-            有効なPythonコードを生成してください。
-            内容を書き換えてはいけません。
-            出力はcsvファイルとなるようにしてください。不要な改行をしないようにしてください。
-            重要：REPLで実行されるため、最後に必ず print(result.rstrip('\n'))文を使って結果を表示してください。
-            例：
-            ```python
-            result = df.head(3).to_csv(index=False)
-            print(result)  # これで結果が表示されます
-            ```
+                ## 問題:
+                {problem}
+
+                ## データパス:
+                {data_path}
+
+                ## データ内容:
+                {data_content}
+                例：
+                ```python
+                result = df.head(3).to_csv(index=False)
+                print(result)  # これで結果が表示されます
+                ```
             """
             ),
         ])
@@ -37,54 +61,9 @@ class CodeGenerationNode:
         
         # コードの生成
         generated_code = chain.invoke({
-            "data": data,
+            "data_path": data_path,
+            "data_content":data_content,
             "problem": problem
         })
                 
         return  generated_code
-
-
-
-
-
-
-
-
-
-
-
-
-# 確認用
-def main():
-    load_dotenv()
-   
-    llm=ChatOpenAI(model="gpt-4o-mini", temperature=0.0)
-    code_generator = CodeGenerationNode(llm)
-    
-    # サンプルデータ
-    sample_data =   """
-                        id,name,age,city
-                        1,田中太郎,28,東京
-                        2,佐藤花子,35,大阪
-                        3,鈴木一郎,42,名古屋
-                        4,山田次郎,31,福岡
-                        5,高橋三郎,47,札幌
-                    """
-    
-    # データの説明
-    data_description = DataAnalysisResult(data_summary="データ",data_content="これは顧客情報のCSVデータで、ID、名前、年齢、都市の情報が含まれています。")
-    
-    # コード生成と実行
-    result = code_generator.run(
-        description=data_description,
-        data=sample_data
-    )
-    
-    # 結果の表示
-    print("【生成されたコード】")
-    print(result.code)
-    print("\n【実行結果】")
-    print(result.output)
-
-if __name__ == "__main__":
-    main()
