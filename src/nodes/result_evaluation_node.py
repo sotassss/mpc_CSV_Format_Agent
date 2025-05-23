@@ -4,7 +4,7 @@ from src.model_types import ExecutePython, EvaluationData
 
 class ResultEvaluationNode:
     """
-    成形後データの評価を行う。
+    整形後データの評価を行う。
 
     Parameters
     ----------
@@ -26,11 +26,11 @@ class ResultEvaluationNode:
             ),
             ("human",
             """
-                以下のデータが解析可能な成形されたデータかを判断してください。
+                以下のデータが解析可能な整形されたデータかを判断してください。
                 このデータを用いて、機械学習が可能かを判定してほしい。
                 データ:{executed_data}
 
-                さらなる成形が必要な場合は、フィードバックも作成してください。
+                さらなる整形が必要な場合は、フィードバックも作成してください。
             """)
         ])
 

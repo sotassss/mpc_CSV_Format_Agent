@@ -53,7 +53,7 @@ class ExcelFormat:
                 data_problem=SearchProblem(problem="抽出された問題"),  
                 generated_code=GeneratePython(code="生成されたPythonコード"),
                 executed_data=ExecutePython(output="成形後のデータ"),  
-                evaluation_result=EvaluationData(result=True, feedback="フィードバック結果")
+                evaluation_result=EvaluationData(result=True, feedback="問題なし")
             )
 
         # ワークフローの実行

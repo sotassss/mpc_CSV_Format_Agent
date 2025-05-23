@@ -1,13 +1,13 @@
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
-
+load_dotenv()
 from src.agent import ExcelFormat
 
 def main():
     load_dotenv()
 
     # 解析ファイル
-    # input_data = "C:/Users/1109685/Documents/IR/input/sample_mess.csv"
+    # input_data = "C:/Users/1109685/Documents/IR/input/sample/freejob.csv"
     input_data = "C:/Users/1109685/Documents/IR/input/sample/sample.csv"
 
     # LLMとAgentの初期化
