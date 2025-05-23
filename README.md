@@ -31,14 +31,14 @@
     git clone [ repository-url ]
     cd IR 
 3. 依存関係をインストール：
-    `pip install -r requirements.txt `
-
+    ```bash
+    pip install -r requirements.txt
 4. .env.example を .env にコピーし、必要な環境変数を設定：
-    `cp .env.example .env `
-
+    ```bash
+    cp .env.example .env
 5. 解析したいcsvファイルを input/sample ディレクトリに配置
    
 6. プログラムを実行：
-    `python main.py `
-
+    ```bash
+    python main.py 
 7. csvファイルが整形されて保存されます
