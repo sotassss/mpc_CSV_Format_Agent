@@ -5,10 +5,10 @@ class SearchProblem(BaseModel):
     problem:str = Field(..., description="Tidyデータに変換する際の問題点")
 
 class GeneratePython(BaseModel):
-    code: str = Field(description="生成されたPythonコード")
+    code: str = Field(...,description="生成されたPythonコード")
 
 class ExecutePython(BaseModel):
-    output: str = Field(description="実行結果")   
+    output: str = Field(...,description="実行結果")   
 
 class EvaluationData(BaseModel):
     result:bool=Field(..., description="判定結果")

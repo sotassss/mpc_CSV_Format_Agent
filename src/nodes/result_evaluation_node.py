@@ -1,6 +1,5 @@
 from langchain_core.prompts import ChatPromptTemplate
-
-from src.model_types import ExecutePython,EvaluationData
+from src.model_types import ExecutePython, EvaluationData
 
 
 class ResultEvaluationNode:
@@ -27,10 +26,11 @@ class ResultEvaluationNode:
             ),
             ("human",
             """
-                以下のデータがtidyデータであるかを判断してください。
+                以下のデータが解析可能な成形されたデータかを判断してください。
+                このデータを用いて、機械学習が可能かを判定してほしい。
                 データ:{executed_data}
 
-                tidyデータでない場合のフィードバックも作成してください。
+                さらなる成形が必要な場合は、フィードバックも作成してください。
             """)
         ])
 

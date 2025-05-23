@@ -50,10 +50,10 @@ class ExcelFormat:
                 data_path=data_path,
                 data_content="",
                 iteration=1,
-                data_problem=SearchProblem(problem="問題"),  
+                data_problem=SearchProblem(problem="抽出された問題"),  
                 generated_code=GeneratePython(code="生成されたPythonコード"),
-                executed_data=ExecutePython(output="実行結果"),  
-                evaluation_result=EvaluationData(result=True, feedback="問題なし")
+                executed_data=ExecutePython(output="成形後のデータ"),  
+                evaluation_result=EvaluationData(result=True, feedback="フィードバック結果")
             )
 
         # ワークフローの実行
@@ -101,18 +101,19 @@ class ExcelFormat:
         handle_proxy_request()  # プロキシ処理
         print("Pythonコード実行中...")
         executed_data = self.code_execution_node.run(
-            code=state.generated_code,
-            save_path=state.data_path
+            code=state.generated_code
             )
         return {
             "executed_data": executed_data
             }
     
     def _result_evaluation(self,state:State):
+        data_df = pd.read_csv(state.data_path, encoding="utf-8")
+        execution = data_df.to_csv(index=False, encoding="utf-8")
         handle_proxy_request()  # プロキシ処理
         print("結果を評価しています...")
         evaluation_result = self.result_evaluation_node.run(
-            state.executed_data
+            execution
             )
         return {
             "evaluation_result": evaluation_result,
