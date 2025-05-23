@@ -8,7 +8,7 @@ def main():
 
     # 解析ファイル
     # input_data = "C:/Users/1109685/Documents/IR/input/sample_mess.csv"
-    input_data = "C:/Users/1109685/Documents/IR/input/sample.csv"
+    input_data = "C:/Users/1109685/Documents/IR/input/sample/sample.csv"
 
     # LLMとAgentの初期化
     llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.0)
