@@ -22,4 +22,4 @@
 - **出力：** 評価結果
 
 ### ステート図
-<img width="600" alt="IRエージェント　ステート図 (1)" src="https://github.com/user-attachments/assets/fe70c47e-748a-48b3-ba2f-4a58bb266a51" />
+<img width="400" alt="IRエージェント　ステート図 (1)" src="https://github.com/user-attachments/assets/fe70c47e-748a-48b3-ba2f-4a58bb266a51" />
